@@ -427,7 +427,8 @@ bool PairEndProcessor::processPairEnd(ReadPack* leftPack, ReadPack* rightPack, T
 
         if(r1 != NULL && r2!=NULL) {
             if(mOptions->polyGTrim.enabled)
-                PolyX::trimPolyG(r1, r2, config->getFilterResult(), mOptions->polyGTrim.minLen);
+                // PolyX::trimPolyG(r1, r2, config->getFilterResult(), mOptions->polyGTrim.minLen);
+                PolyX::trimPolyG(r1, r2, config->getFilterResult(), mOptions->polyGTrim.percentG);
         }
         bool isizeEvaluated = false;
         if(r1 != NULL && r2!=NULL && (mOptions->adapter.enabled || mOptions->correction.enabled)){

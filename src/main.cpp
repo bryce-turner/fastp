@@ -76,6 +76,7 @@ int main(int argc, char* argv[]){
     // polyG tail trimming
     cmd.add("trim_poly_g", 'g', "force polyG tail trimming, by default trimming is automatically enabled for Illumina NextSeq/NovaSeq data");
     cmd.add<int>("poly_g_min_len", 0, "the minimum length to detect polyG in the read tail. 10 by default.", false, 10);
+    cmd.add<float>("poly_g_percent", 0.0, "Minimum percent of G bases for a read to be considered polyG. 0.90 by default.", false, 0.90);
     cmd.add("disable_trim_poly_g", 'G', "disable polyG tail trimming, by default trimming is automatically enabled for Illumina NextSeq/NovaSeq data");
     
     // polyX tail trimming
@@ -254,6 +255,7 @@ int main(int argc, char* argv[]){
         opt.polyGTrim.enabled = false;
     }
     opt.polyGTrim.minLen = cmd.get<int>("poly_g_min_len");
+    opt.polyGTrim.percentG = cmd.get<int>("poly_g_percent");
 
     // polyX tail trimming
     if(cmd.exist("trim_poly_x")) {

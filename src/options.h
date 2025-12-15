@@ -84,10 +84,12 @@ public:
     PolyGTrimmerOptions() {
         enabled = false;
         minLen = 10;
+        percentG = 0.90;
     }
 public:
     bool enabled;
     int minLen;
+    float percentG;
 };
 
 class PolyXTrimmerOptions {

@@ -13,6 +13,11 @@ void PolyX::trimPolyG(Read* r1, Read* r2, FilterResult* fr, int compareReq) {
     trimPolyG(r2, fr, compareReq);
 }
 
+void PolyX::trimPolyG(Read* r1, Read* r2, FilterResult* fr, float percReq) {
+    trimPolyG(r1, fr, percReq);
+    trimPolyG(r2, fr, percReq);
+}
+
 void PolyX::trimPolyG(Read* r, FilterResult* fr, int compareReq) {
     const int allowOneMismatchForEach = 8;
     const int maxMismatch = 5;
@@ -38,6 +43,27 @@ void PolyX::trimPolyG(Read* r, FilterResult* fr, int compareReq) {
 
     if(i >= compareReq) {
         r->resize(firstGPos);
+    }
+}
+
+void PolyX::trimPolyG(Read* r, FilterResult* fr, float percReq) {
+    const char* data = r->mSeq->c_str();
+
+    int rlen = r->length();
+
+    int match = 0;
+    int i = 0;
+    int firstGPos = rlen - 1;
+    for(i=0; i< rlen; i++) {
+        if(data[rlen - i - 1] == 'G') {
+            match++;
+        }
+
+    }
+
+    float percentG = float(match) / rlen;
+    if(percentG >= percReq) {
+        r->resize(0);
     }
 }
 
@@ -127,4 +153,19 @@ bool PolyX::test() {
     r.print();
 
     return *r.mSeq == "ATTTT" && fr.getTotalPolyXTrimmedReads() == 1 && fr.getTotalPolyXTrimmedBases() == 51;
+}
+
+bool PolyX::test_percentG() {
+
+    Read r("@name",
+        "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGCGGGGGGGGGGGGGGGGGGGGGGGGGG",
+        "+",
+        "///EEEEEEEEEEEEEEEEEEEEEEEEEE////EEEEEEEEEEEEE////E////E");
+
+    FilterResult fr(NULL, false);
+    float percentG = 0.90;
+    PolyX::trimPolyG(&r, &fr, percentG);
+    r.print();
+
+    return *r.mSeq == "";
 }

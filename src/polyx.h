@@ -16,10 +16,13 @@ public:
     ~PolyX();
 
     static void trimPolyG(Read* r1, Read* r2, FilterResult* fr, int compareReq);
+    static void trimPolyG(Read* r1, Read* r2, FilterResult* fr, float percReq);
     static void trimPolyG(Read* r1, FilterResult* fr, int compareReq);
+    static void trimPolyG(Read* r1, FilterResult* fr, float percReq);
     static void trimPolyX(Read* r1, Read* r2, FilterResult* fr, int compareReq);
     static void trimPolyX(Read* r1, FilterResult* fr, int compareReq);
     static bool test();
+    static bool test_percentG();
 
 
 };
