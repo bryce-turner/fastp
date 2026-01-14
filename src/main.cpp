@@ -75,6 +75,10 @@ int main(int argc, char* argv[]){
 
     // polyG tail trimming
     cmd.add("trim_poly_g", 'g', "force polyG tail trimming, by default trimming is automatically enabled for Illumina NextSeq/NovaSeq data");
+    cmd.add("trim_poly_g_by_len", 0, "Set polyG tail trimming to be performed by length");
+    cmd.add("trim_poly_g_by_percent", 0, "Set polyG trimming to be performed by percent of G bases within the read");
+    cmd.add("trim_poly_g_read1only", 0, "When processing paired-end reads, only trim read1 polyG");
+    cmd.add("trim_poly_g_read2only", 0, "When processing paired-end reads, only trim read2 polyG");
     cmd.add<int>("poly_g_min_len", 0, "the minimum length to detect polyG in the read tail. 10 by default.", false, 10);
     cmd.add<float>("poly_g_percent", 0, "Minimum percent of G bases for a read to be considered polyG. 0.90 by default.", false, 0.90);
     cmd.add("disable_trim_poly_g", 'G', "disable polyG tail trimming, by default trimming is automatically enabled for Illumina NextSeq/NovaSeq data");
@@ -253,6 +257,20 @@ int main(int argc, char* argv[]){
         opt.polyGTrim.enabled = true;
     } else if(cmd.exist("disable_trim_poly_g")) {
         opt.polyGTrim.enabled = false;
+    }
+    if(cmd.exist("trim_poly_g_by_len")) {
+        opt.polyGTrim.byLength = true;
+    } else if(cmd.exist("trim_poly_g_by_percent")) {
+        opt.polyGTrim.byPercent = true;
+    } else {
+        opt.polyGTrim.byPercent = true;
+    }
+    if(cmd.exist("trim_poly_g_read1only") && cmd.exist("trim_poly_g_read2only")) {
+        error_exit("You cannot enabled both trim_poly_g_read1only and trim_poly_g_read2only");
+    } else if(cmd.exist("trim_poly_g_read1only")) {
+        opt.polyGTrim.readSwitch = 1;
+    } else if(cmd.exist("trim_poly_g_read2only")) {
+        opt.polyGTrim.readSwitch = 2;
     }
     opt.polyGTrim.minLen = cmd.get<int>("poly_g_min_len");
     opt.polyGTrim.percentG = cmd.get<float>("poly_g_percent");

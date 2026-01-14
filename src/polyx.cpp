@@ -8,14 +8,32 @@ PolyX::PolyX(){
 PolyX::~PolyX(){
 }
 
-void PolyX::trimPolyG(Read* r1, Read* r2, FilterResult* fr, int compareReq) {
-    trimPolyG(r1, fr, compareReq);
-    trimPolyG(r2, fr, compareReq);
+void PolyX::trimPolyG(Read* r1, Read* r2, FilterResult* fr, int compareReq, int readSwitch) {
+    switch (readSwitch) {
+        case 1:
+            trimPolyG(r1, fr, compareReq);
+            break;
+        case 2:
+            trimPolyG(r2, fr, compareReq);
+            break;
+        default:
+            trimPolyG(r1, fr, compareReq);
+            trimPolyG(r2, fr, compareReq);
+    }
 }
 
-void PolyX::trimPolyG(Read* r1, Read* r2, FilterResult* fr, float percReq) {
-    trimPolyG(r1, fr, percReq);
-    trimPolyG(r2, fr, percReq);
+void PolyX::trimPolyG(Read* r1, Read* r2, FilterResult* fr, float percReq, int readSwitch) {
+    switch (readSwitch) {
+        case 1:
+            trimPolyG(r1, fr, percReq);
+            break;
+        case 2:
+            trimPolyG(r2, fr, percReq);
+            break;
+        default:
+            trimPolyG(r1, fr, percReq);
+            trimPolyG(r2, fr, percReq);
+    }
 }
 
 void PolyX::trimPolyG(Read* r, FilterResult* fr, int compareReq) {

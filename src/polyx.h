@@ -15,8 +15,8 @@ public:
     PolyX();
     ~PolyX();
 
-    static void trimPolyG(Read* r1, Read* r2, FilterResult* fr, int compareReq);
-    static void trimPolyG(Read* r1, Read* r2, FilterResult* fr, float percReq);
+    static void trimPolyG(Read* r1, Read* r2, FilterResult* fr, int compareReq, int readSwitch);
+    static void trimPolyG(Read* r1, Read* r2, FilterResult* fr, float percReq, int readSwitch);
     static void trimPolyG(Read* r1, FilterResult* fr, int compareReq);
     static void trimPolyG(Read* r1, FilterResult* fr, float percReq);
     static void trimPolyX(Read* r1, Read* r2, FilterResult* fr, int compareReq);

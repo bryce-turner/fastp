@@ -83,11 +83,17 @@ class PolyGTrimmerOptions {
 public:
     PolyGTrimmerOptions() {
         enabled = false;
+        byLength = false;
+        byPercent = false;
+        readSwitch = 0;
         minLen = 10;
         percentG = 0.90;
     }
 public:
     bool enabled;
+    bool byLength;
+    bool byPercent;
+    int readSwitch;
     int minLen;
     float percentG;
 };

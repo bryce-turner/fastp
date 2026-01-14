@@ -426,9 +426,13 @@ bool PairEndProcessor::processPairEnd(ReadPack* leftPack, ReadPack* rightPack, T
         Read* r2 = mFilter->trimAndCut(or2, mOptions->trim.front2, mOptions->trim.tail2, frontTrimmed2);
 
         if(r1 != NULL && r2!=NULL) {
-            if(mOptions->polyGTrim.enabled)
-                // PolyX::trimPolyG(r1, r2, config->getFilterResult(), mOptions->polyGTrim.minLen);
-                PolyX::trimPolyG(r1, r2, config->getFilterResult(), mOptions->polyGTrim.percentG);
+            if(mOptions->polyGTrim.enabled) {
+                if(mOptions->polyGTrim.byLength) {
+                    PolyX::trimPolyG(r1, r2, config->getFilterResult(), mOptions->polyGTrim.minLen, mOptions->polyGTrim.readSwitch);
+                } else if(mOptions->polyGTrim.byPercent) {
+                    PolyX::trimPolyG(r1, r2, config->getFilterResult(), mOptions->polyGTrim.percentG, mOptions->polyGTrim.readSwitch);
+                }
+            }
         }
         bool isizeEvaluated = false;
         if(r1 != NULL && r2!=NULL && (mOptions->adapter.enabled || mOptions->correction.enabled)){
