@@ -75,7 +75,7 @@ int main(int argc, char* argv[]){
 
     // polyG tail trimming
     cmd.add("trim_poly_g", 'g', "force polyG tail trimming, by default trimming is automatically enabled for Illumina NextSeq/NovaSeq data");
-    cmd.add("trim_poly_g_by_len", 0, "Set polyG tail trimming to be performed by length");
+    cmd.add("trim_poly_g_by_len", 0, "Set polyG tail trimming to be performed by length, default: True");
     cmd.add("trim_poly_g_by_percent", 0, "Set polyG trimming to be performed by percent of G bases within the read");
     cmd.add("trim_poly_g_read1only", 0, "When processing paired-end reads, only trim read1 polyG");
     cmd.add("trim_poly_g_read2only", 0, "When processing paired-end reads, only trim read2 polyG");
@@ -263,7 +263,7 @@ int main(int argc, char* argv[]){
     } else if(cmd.exist("trim_poly_g_by_percent")) {
         opt.polyGTrim.byPercent = true;
     } else {
-        opt.polyGTrim.byPercent = true;
+        opt.polyGTrim.byLength = true;
     }
     if(cmd.exist("trim_poly_g_read1only") && cmd.exist("trim_poly_g_read2only")) {
         error_exit("You cannot enabled both trim_poly_g_read1only and trim_poly_g_read2only");
