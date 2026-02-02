@@ -81,10 +81,10 @@ void PairEndProcessor::initOutput() {
     if(!mOptions->overlappedOut.empty())
         mOverlappedWriter = new WriterThread(mOptions, mOptions->overlappedOut);
 
-    if(mOptions->out1.empty())
+    if(mOptions->out1.empty() && !mOptions->outputToSTDOUT)
         return;
     
-    mLeftWriter = new WriterThread(mOptions, mOptions->out1);
+    mLeftWriter = new WriterThread(mOptions, mOptions->out1, mOptions->outputToSTDOUT);
     if(!mOptions->out2.empty())
         mRightWriter = new WriterThread(mOptions, mOptions->out2);
 }
@@ -361,7 +361,7 @@ void PairEndProcessor::recycleToPool2(int tid, Read* r) {
 bool PairEndProcessor::processPairEnd(ReadPack* leftPack, ReadPack* rightPack, ThreadConfig* config){
     if(leftPack->count != rightPack->count) {
         cerr << endl;
-        cerr << "WARNNIG: different read numbers of the " << mPackProcessedCounter << " pack" << endl;
+        cerr << "WARNING: different read numbers of the " << mPackProcessedCounter << " pack" << endl;
         cerr << "Read1 pack size: " << leftPack->count << endl;
         cerr << "Read2 pack size: " << rightPack->count << endl;
         cerr << "Ignore the unmatched reads" << endl << endl;
@@ -435,6 +435,7 @@ bool PairEndProcessor::processPairEnd(ReadPack* leftPack, ReadPack* rightPack, T
             }
         }
         bool isizeEvaluated = false;
+        bool isAdapterDimer = false;
         if(r1 != NULL && r2!=NULL && (mOptions->adapter.enabled || mOptions->correction.enabled)){
             OverlapResult ov = OverlapAnalysis::analyze(r1, r2, mOptions->overlapDiffLimit, mOptions->overlapRequire, mOptions->overlapDiffPercentLimit/100.0, mOptions->adapter.allowGapOverlapTrimming);
             // we only use thread 0 to evaluae ISIZE
@@ -457,8 +458,16 @@ bool PairEndProcessor::processPairEnd(ReadPack* leftPack, ReadPack* rightPack, T
                         trimmed2 = AdapterTrimmer::trimBySequence(r2, config->getFilterResult(), mOptions->adapter.sequenceR2, true);
                 }
                 if(mOptions->adapter.hasFasta) {
-                    AdapterTrimmer::trimByMultiSequences(r1, config->getFilterResult(), mOptions->adapter.seqsInFasta, false, !trimmed1);
-                    AdapterTrimmer::trimByMultiSequences(r2, config->getFilterResult(), mOptions->adapter.seqsInFasta, true, !trimmed2);
+                    trimmed1 |= AdapterTrimmer::trimByMultiSequences(r1, config->getFilterResult(), mOptions->adapter.seqsInFasta, false, !trimmed1);
+                    trimmed2 |= AdapterTrimmer::trimByMultiSequences(r2, config->getFilterResult(), mOptions->adapter.seqsInFasta, true, !trimmed2);
+                }
+
+                // Check for adapter dimer: both reads shorter than threshold after adapter trimming
+                // AND adapters were detected in at least one of the reads (requires evidence)
+                if(r1 != NULL && r2 != NULL && (trimmed1 || trimmed2) &&
+                   r1->length() <= mOptions->adapter.dimerMaxLen &&
+                   r2->length() <= mOptions->adapter.dimerMaxLen) {
+                    isAdapterDimer = true;
                 }
             }
         }
@@ -509,13 +518,19 @@ bool PairEndProcessor::processPairEnd(ReadPack* leftPack, ReadPack* rightPack, T
                 mergeProcessed = true;
             } else if(mOptions->merge.includeUnmerged){
                 int result1 = mFilter->passFilter(r1);
+                int result2 = mFilter->passFilter(r2);
+
+                if(isAdapterDimer) {
+                    result1 = FAIL_ADAPTER_DIMER;
+                    result2 = FAIL_ADAPTER_DIMER;
+                }
+
                 config->addFilterResult(result1, 1);
                 if(result1 == PASS_FILTER && !dedupOut) {
                     r1->appendToString(mergedOutput);
                     config->getPostStats1()->statRead(r1);
                 }
 
-                int result2 = mFilter->passFilter(r2);
                 config->addFilterResult(result2, 1);
                 if(result2 == PASS_FILTER && !dedupOut) {
                     r2->appendToString(mergedOutput);
@@ -531,6 +546,11 @@ bool PairEndProcessor::processPairEnd(ReadPack* leftPack, ReadPack* rightPack, T
 
             int result1 = mFilter->passFilter(r1);
             int result2 = mFilter->passFilter(r2);
+
+            if(isAdapterDimer) {
+                result1 = FAIL_ADAPTER_DIMER;
+                result2 = FAIL_ADAPTER_DIMER;
+            }
 
             config->addFilterResult(max(result1, result2), 2);
 
@@ -604,15 +624,7 @@ bool PairEndProcessor::processPairEnd(ReadPack* leftPack, ReadPack* rightPack, T
         }
     }
 
-    if(mOptions->outputToSTDOUT) {
-        // STDOUT output
-        // if it's merging mode, write the merged reads to STDOUT
-        // otherwise write interleaved single output
-        if(mOptions->merge.enabled)
-            fwrite(mergedOutput->c_str(), 1, mergedOutput->length(), stdout);
-        else
-            fwrite(singleOutput->c_str(), 1, singleOutput->length(), stdout);
-    } else if(mOptions->split.enabled) {
+	if(mOptions->split.enabled) {
         // split output by each worker thread
         if(!mOptions->out1.empty()) 
             config->getWriter1()->writeString(outstr1);
@@ -690,8 +702,8 @@ bool PairEndProcessor::processPairEnd(ReadPack* leftPack, ReadPack* rightPack, T
     if(overlappedOut)
         delete overlappedOut;
 
-    delete leftPack->data;
-    delete rightPack->data;
+    delete[] leftPack->data;
+    delete[] rightPack->data;
     delete leftPack;
     delete rightPack;
 
@@ -881,10 +893,11 @@ void PairEndProcessor::interleavedReaderTask()
     FastqReaderPair reader(mOptions->in1, mOptions->in2, true, mOptions->phred64,true);
     int count=0;
     bool needToBreak = false;
+    ReadPair* pair = new ReadPair();
     while(true){
-        ReadPair* pair = reader.read();
+        reader.read(pair);
         // TODO: put needToBreak here is just a WAR for resolve some unidentified dead lock issue 
-        if(!pair || needToBreak){
+        if(pair->eof() || needToBreak){
             // the last pack
             ReadPack* packLeft = new ReadPack;
             ReadPack* packRight = new ReadPack;
@@ -901,10 +914,6 @@ void PairEndProcessor::interleavedReaderTask()
 
             dataLeft = NULL;
             dataRight = NULL;
-            if(pair) {
-                delete pair;
-                pair = NULL;
-            }
             break;
         }
         dataLeft[count] = pair->mLeft;
@@ -972,6 +981,8 @@ void PairEndProcessor::interleavedReaderTask()
             }*/
         }
     }
+
+    delete pair;
 
     for(int t=0; t<mOptions->thread; t++) {
         mLeftInputLists[t]->setProducerFinished();

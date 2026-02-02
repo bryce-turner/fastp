@@ -210,6 +210,7 @@ public:
         hasSeqR2 = false;
         detectAdapterForPE = false;
         allowGapOverlapTrimming = false;
+        dimerMaxLen = 2;
     }
 public:
     bool enabled;
@@ -224,6 +225,7 @@ public:
     bool hasFasta;
     bool detectAdapterForPE;
     bool allowGapOverlapTrimming;
+    int dimerMaxLen;
 };
 
 class TrimmingOptions {

@@ -59,6 +59,7 @@ int main(int argc, char* argv[]){
     cmd.add<string>("adapter_fasta", 0, "specify a FASTA file to trim both read1 and read2 (if PE) by all the sequences in this FASTA file", false, "");
     cmd.add("detect_adapter_for_pe", '2', "enable adapter detection for PE data to get ultra-clean data. It takes more time to find just a little bit more adapters.");
     cmd.add("allow_gap_overlap_trimming", 0, "allow up to one gap when trim adapters by overlap analysis for PE data. By default no gap is allowed.");
+    cmd.add<int>("dimer_max_len", 0, "if the read length is less than or equal to this value after adapter trimming, it is considered an adapter dimer. Requires adapter evidence.", false, 2);
 
     // trimming
     cmd.add<int>("trim_front1", 'f', "trimming how many bases in front for read1, default is 0", false, 0);
@@ -70,7 +71,7 @@ int main(int argc, char* argv[]){
 
     // duplication evaluation and deduplication
     cmd.add("dedup", 'D', "enable deduplication to drop the duplicated reads/pairs");
-    cmd.add<int>("dup_calc_accuracy", 0, "accuracy level to calculate duplication (1~6), higher level uses more memory (1G, 2G, 4G, 8G, 16G, 24G). Default 1 for no-dedup mode, and 3 for dedup mode.", false);
+    cmd.add<int>("dup_calc_accuracy", 0, "accuracy level to calculate duplication (1~6), higher level uses more memory (1G, 2G, 4G, 8G, 16G, 32G). Default 1 for no-dedup mode, and 3 for dedup mode.", false);
     cmd.add("dont_eval_duplication", 0, "don't evaluate duplication rate to save time and use less memory.");
 
     // polyG tail trimming
@@ -168,7 +169,7 @@ int main(int argc, char* argv[]){
     if(argc == 1) {
         //output citation information
         cerr << "Citation:" <<endl;
-        cerr << "Shifu Chen. 2023. Ultrafast one-pass FASTQ data preprocessing, quality control, and deduplication using fastp. iMeta 2: e107" << endl;
+        cerr << "Chen, S. (2025). Fastp 1.0: An ultra‐fast all‐round tool for FASTQ data quality control and preprocessing. Imeta, 4(5), e70078." << endl;
         cerr << endl;
         return 0;
     }
@@ -222,6 +223,7 @@ int main(int argc, char* argv[]){
     opt.adapter.enabled = !cmd.exist("disable_adapter_trimming");
     opt.adapter.detectAdapterForPE = cmd.exist("detect_adapter_for_pe");
     opt.adapter.allowGapOverlapTrimming = cmd.exist("allow_gap_overlap_trimming");
+    opt.adapter.dimerMaxLen = cmd.get<int>("dimer_max_len");
     opt.adapter.sequence = cmd.get<string>("adapter_sequence");
     opt.adapter.sequenceR2 = cmd.get<string>("adapter_sequence_r2");
     opt.adapter.fastaFile = cmd.get<string>("adapter_fasta");
