@@ -213,13 +213,15 @@ void FilterResult::addPolyGTrimmed(int base, int length) {
 
 long FilterResult::getTotalPolyGTrimmedReads() {
   long sum_reads = 0;
-  sum_reads += mTrimmedPolyGReads[3];
+  for(int b = 0; b < 4; b++)
+    sum_reads += mTrimmedPolyGReads[b];
   return sum_reads;
 }
 
 long FilterResult::getTotalPolyGTrimmedBases() {
   long sum_bases = 0;
-  sum_bases += mTrimmedPolyGBases[3];
+  for(int b = 0; b < 4; b++)
+    sum_bases += mTrimmedPolyGBases[b];
   return sum_bases;
 }
 

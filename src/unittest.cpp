@@ -26,6 +26,7 @@ void UnitTest::run(){
     passed &= report(BaseCorrector::test(), "BaseCorrector::test");
     passed &= report(PolyX::test(), "PolyX::test");
     passed &= report(PolyX::test_percentG(), "PolyX::test_percentG");
+    passed &= report(PolyX::test_polyG(), "PolyX::test_polyG");
     passed &= report(NucleotideTree::test(), "NucleotideTree::test");
     passed &= report(Evaluator::test(), "Evaluator::test");
     printf("\n==========================\n");

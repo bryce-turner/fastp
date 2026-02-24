@@ -23,6 +23,7 @@ public:
     static void trimPolyX(Read* r1, FilterResult* fr, int compareReq);
     static bool test();
     static bool test_percentG();
+    static bool test_polyG();
 
 
 };

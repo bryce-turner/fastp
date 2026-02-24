@@ -61,6 +61,8 @@ void PolyX::trimPolyG(Read* r, FilterResult* fr, int compareReq) {
 
     if(i >= compareReq) {
         r->resize(firstGPos);
+        if(fr)
+          fr->addPolyGTrimmed(3, rlen - firstGPos);
     }
 }
 
@@ -188,4 +190,18 @@ bool PolyX::test_percentG() {
     r.print();
 
     return *r.mSeq == "" && fr.getTotalPolyGTrimmedReads() == 1 && fr.getTotalPolyGTrimmedBases() == 56;
+}
+
+bool PolyX::test_polyG() {
+
+    Read r("@name",
+        "AATTCCGCTACTATGACCGGGGGGGGGGGGGGGGGGGGGGGGGGGCGGGGGGGGGG",
+        "+",
+        "///EEEEEEEEEEEEEEEEEEEEEEEEEE////EEEEEEEEEEEEE////E////E");
+
+    FilterResult fr(NULL, false);
+    PolyX::trimPolyG(&r, &fr, 10);
+    r.print();
+
+    return *r.mSeq == "AATTCCGCTACTAT" && fr.getTotalPolyGTrimmedReads() == 1 && fr.getTotalPolyGTrimmedBases() == 42;
 }
