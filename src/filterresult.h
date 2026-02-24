@@ -39,12 +39,17 @@ public:
     void addPolyXTrimmed(int base, int length);
     long getTotalPolyXTrimmedReads();
     long getTotalPolyXTrimmedBases();
+    void addPolyGTrimmed(int base, int length);
+    long getTotalPolyGTrimmedReads();
+    long getTotalPolyGTrimmedBases();
     // a part of JSON report
     void reportJson(ofstream& ofs, string padding);
     // a part of JSON report for adapters
     void reportAdapterJson(ofstream& ofs, string padding);
     // a part of JSON report for polyX trim
     void reportPolyXTrimJson(ofstream& ofs, string padding);
+    // a part of JSON report for polyG trim
+    void reportPolyGTrimJson(ofstream& ofs, string padding);
     // a part of HTML report
     void reportHtml(ofstream& ofs, long totalReads, long totalBases);
     // a part of HTML report for adapters
@@ -73,6 +78,8 @@ private:
     long mTrimmedAdapterBases;
     long mTrimmedPolyXReads[4] = {0};
     long mTrimmedPolyXBases[4] = {0};
+    long mTrimmedPolyGReads[4] = {0};
+    long mTrimmedPolyGBases[4] = {0};
     map<string, long, classcomp> mAdapter1;
     map<string, long, classcomp> mAdapter2;
     long* mCorrectionMatrix;

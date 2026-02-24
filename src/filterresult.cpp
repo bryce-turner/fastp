@@ -55,6 +55,11 @@ FilterResult* FilterResult::merge(vector<FilterResult*>& list) {
           result->mTrimmedPolyXReads[b] += list[i]->mTrimmedPolyXReads[b];
           result->mTrimmedPolyXBases[b] += list[i]->mTrimmedPolyXBases[b];
         }
+        for(int b=0; b<4; b++) {
+          result->mTrimmedPolyGReads[b] += list[i]->mTrimmedPolyGReads[b];
+          result->mTrimmedPolyGBases[b] += list[i]->mTrimmedPolyGBases[b];
+        }
+
 
         // merge adapter stats
         map<string, long>::iterator iter;
@@ -201,6 +206,22 @@ long FilterResult::getTotalPolyXTrimmedBases() {
   return sum_bases;
 }
 
+void FilterResult::addPolyGTrimmed(int base, int length) {
+    mTrimmedPolyGReads[base] += 1;
+    mTrimmedPolyGBases[base] += length;
+}
+
+long FilterResult::getTotalPolyGTrimmedReads() {
+  long sum_reads = 0;
+  sum_reads += mTrimmedPolyGReads[3];
+  return sum_reads;
+}
+
+long FilterResult::getTotalPolyGTrimmedBases() {
+  long sum_bases = 0;
+  sum_bases += mTrimmedPolyGBases[3];
+  return sum_bases;
+}
 
 
 
@@ -224,6 +245,10 @@ void FilterResult::print() {
     if(mOptions->polyXTrim.enabled) {
         cerr <<  "reads with polyX in 3' end: " << getTotalPolyXTrimmedReads() << endl;
         cerr <<  "bases trimmed in polyX tail: " << getTotalPolyXTrimmedBases() << endl;
+    }
+    if(mOptions->polyGTrim.enabled) {
+        cerr <<  "reads with polyG in 3' end: " << getTotalPolyGTrimmedReads() << endl;
+        cerr <<  "bases trimmed in polyG tail: " << getTotalPolyGTrimmedBases() << endl;
     }
     if(mOptions->correction.enabled) {
         cerr <<  "reads corrected by overlap analysis: " << mCorrectedReads << endl;
@@ -330,6 +355,14 @@ void FilterResult::reportPolyXTrimJson(ofstream& ofs, string padding) {
     writeBaseCountsJson(ofs, padding, "polyx_trimmed_reads", getTotalPolyXTrimmedReads(), mTrimmedPolyXReads);
     ofs << "," << endl;
     writeBaseCountsJson(ofs, padding, "polyx_trimmed_bases", getTotalPolyXTrimmedBases(), mTrimmedPolyXBases);
+    ofs << endl << padding << "}," << endl;
+}
+
+void FilterResult::reportPolyGTrimJson(ofstream& ofs, string padding) {
+    ofs << padding << "{" << endl;
+    writeBaseCountsJson(ofs, padding, "polyg_trimmed_reads", getTotalPolyGTrimmedReads(), mTrimmedPolyGReads);
+    ofs << "," << endl;
+    writeBaseCountsJson(ofs, padding, "polyg_trimmed_bases", getTotalPolyGTrimmedBases(), mTrimmedPolyGBases);
     ofs << endl << padding << "}," << endl;
 }
 

@@ -49,6 +49,10 @@ bool Options::polyXTrimmingEnabled() {
     return polyXTrim.enabled;
 }
 
+bool Options::polyGTrimmingEnabled() {
+    return polyGTrim.enabled;
+}
+
 void Options::loadFastaAdapters() {
     if(adapter.fastaFile.empty()) {
         adapter.hasFasta = false;

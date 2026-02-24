@@ -299,6 +299,7 @@ public:
     bool validate();
     bool adapterCuttingEnabled();
     bool polyXTrimmingEnabled();
+    bool polyGTrimmingEnabled();
     string getAdapter1();
     string getAdapter2();
     void initIndexFiltering(string blacklistFile1, string blacklistFile2, int threshold = 0);

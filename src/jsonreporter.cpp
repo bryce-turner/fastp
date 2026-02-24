@@ -143,6 +143,11 @@ void JsonReporter::report(FilterResult* result, Stats* preStats1, Stats* postSta
         result -> reportPolyXTrimJson(ofs, "\t");
     }
 
+    if(result && mOptions->polyGTrimmingEnabled()) {
+        ofs << "\t" << "\"polyg_trimming\": " ;
+        result -> reportPolyGTrimJson(ofs, "\t");
+    }
+
     if(preStats1) {
         ofs << "\t" << "\"read1_before_filtering\": " ;
         preStats1 -> reportJson(ofs, "\t");

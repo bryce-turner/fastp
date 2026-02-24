@@ -82,6 +82,8 @@ void PolyX::trimPolyG(Read* r, FilterResult* fr, float percReq) {
     float percentG = float(match) / rlen;
     if(percentG >= percReq) {
         r->resize(0);
+        if(fr)
+          fr->addPolyGTrimmed(3, rlen);
     }
 }
 
@@ -185,5 +187,5 @@ bool PolyX::test_percentG() {
     PolyX::trimPolyG(&r, &fr, percentG);
     r.print();
 
-    return *r.mSeq == "";
+    return *r.mSeq == "" && fr.getTotalPolyGTrimmedReads() == 1 && fr.getTotalPolyGTrimmedBases() == 56;
 }
